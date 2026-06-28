@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const pool = require('../db/pool');
+const { checkAndCreateFailedLoginAlert } = require('../services/alert.service');
 
 const register = async (req, res) => {
   try {
@@ -66,12 +67,15 @@ const login = async (req, res) => {
     if (!user) {
       await pool.query(
         `insert into login_attempts (user_id, username_attempted, ip_address, success)
-         values ($1, $2, $3, $4)`,
+        values ($1, $2, $3, $4)`,
         [null, username, ipAddress, false]
       );
 
+      const alert = await checkAndCreateFailedLoginAlert(ipAddress);
+
       return res.status(401).json({
         message: 'Invalid username or password',
+        alertCreated: !!alert,
       });
     }
 
@@ -87,8 +91,11 @@ const login = async (req, res) => {
     );
 
     if (!isPasswordCorrect) {
+      const alert = await checkAndCreateFailedLoginAlert(ipAddress);
+
       return res.status(401).json({
         message: 'Invalid username or password',
+        alertCreated: !!alert,
       });
     }
 
