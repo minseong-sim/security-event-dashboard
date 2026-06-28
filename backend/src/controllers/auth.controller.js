@@ -43,6 +43,73 @@ const register = async (req, res) => {
   }
 };
 
+const login = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const ipAddress =
+      req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+
+    if (!username || !password) {
+      return res.status(400).json({
+        message: 'Username and password are required',
+      });
+    }
+
+    const userResult = await pool.query(
+      'select * from users where username = $1',
+      [username]
+    );
+
+    const user = userResult.rows[0];
+
+    if (!user) {
+      await pool.query(
+        `insert into login_attempts (user_id, username_attempted, ip_address, success)
+         values ($1, $2, $3, $4)`,
+        [null, username, ipAddress, false]
+      );
+
+      return res.status(401).json({
+        message: 'Invalid username or password',
+      });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      user.password_hash
+    );
+
+    await pool.query(
+      `insert into login_attempts (user_id, username_attempted, ip_address, success)
+       values ($1, $2, $3, $4)`,
+      [user.id, username, ipAddress, isPasswordCorrect]
+    );
+
+    if (!isPasswordCorrect) {
+      return res.status(401).json({
+        message: 'Invalid username or password',
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    console.error('Login error:', err.message);
+    return res.status(500).json({
+      message: 'Internal server error',
+    });
+  }
+};
+
 module.exports = {
   register,
+  login,
 };
