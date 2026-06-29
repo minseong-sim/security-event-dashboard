@@ -5,12 +5,19 @@ require('dotenv').config();
 const pool = require('./db/pool');
 const authRoutes = require('./routes/auth.routes');
 
+const loginAttemptsRoutes = require('./routes/loginAttempts.routes');
+const alertsRoutes = require('./routes/alerts.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/login-attempts', loginAttemptsRoutes);
+app.use('/api/security-alerts', alertsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.get('/health', async (req, res) => {
   try {
