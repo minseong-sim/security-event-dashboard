@@ -1,0 +1,19 @@
+{
+  "name": "security-event-dashboard-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for the Security Event Dashboard project",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "axios": "^1.18.1",
+    "react": "latest",
+    "react-dom": "latest",
+    "vite": "latest"
+  }
+}
