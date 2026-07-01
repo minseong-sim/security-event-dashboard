@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 import SummaryCards from '../components/SummaryCards';
@@ -6,6 +7,8 @@ import LoginAttemptsTable from '../components/LoginAttemptsTable';
 import AlertsTable from '../components/AlertsTable';
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user'));
   const [summary, setSummary] = useState(null);
   const [loginAttempts, setLoginAttempts] = useState([]);
   const [securityAlerts, setSecurityAlerts] = useState([]);
@@ -43,6 +46,11 @@ function Dashboard() {
     fetchDashboardData();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   return (
     <div style={styles.page}>
       <div style={styles.container}>
@@ -56,9 +64,21 @@ function Dashboard() {
             </p>
           </div>
 
-          <div style={styles.statusBox}>
-            <span style={styles.statusDot}></span>
-            Backend Connected
+          <div style={styles.headerActions}>
+            {user && (
+              <div style={styles.userBox}>
+                Logged in as <strong>{user.username}</strong>
+              </div>
+            )}
+
+            <div style={styles.statusBox}>
+              <span style={styles.statusDot}></span>
+              Backend Connected
+            </div>
+
+            <button style={styles.logoutButton} onClick={handleLogout}>
+              Logout
+            </button>
           </div>
         </header>
 
@@ -198,6 +218,31 @@ const styles = {
     padding: '16px',
     borderRadius: '12px',
     fontWeight: 600,
+  },
+  headerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
+  userBox: {
+    padding: '10px 14px',
+    borderRadius: '999px',
+    background: '#eff6ff',
+    color: '#1d4ed8',
+    fontWeight: 600,
+    fontSize: '14px',
+    whiteSpace: 'nowrap',
+  },
+  logoutButton: {
+    padding: '10px 14px',
+    borderRadius: '999px',
+    border: 'none',
+    background: '#111827',
+    color: '#ffffff',
+    fontWeight: 700,
+    cursor: 'pointer',
   },
 };
 
