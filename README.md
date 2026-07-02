@@ -22,6 +22,8 @@ This project connects concepts from database design, backend API development, au
 - Recent login attempts table
 - React frontend connected to Express backend APIs
 - Security alert resolution workflow
+- JWT-based authentication
+- Protected dashboard API routes
 
 ## Tech Stack
 
@@ -258,8 +260,6 @@ Through this project, I practised:
 
 ## Future Improvements
 
-- Add JWT-based authentication
-- Add protected dashboard routes
 - Add admin-only access control
 - Add charts for login trends
 - Add filtering by username, IP address, and status
