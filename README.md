@@ -21,6 +21,7 @@ This project connects concepts from database design, backend API development, au
 - Security alerts table
 - Recent login attempts table
 - React frontend connected to Express backend APIs
+- Security alert resolution workflow
 
 ## Tech Stack
 
@@ -260,7 +261,6 @@ Through this project, I practised:
 - Add JWT-based authentication
 - Add protected dashboard routes
 - Add admin-only access control
-- Add alert resolve button
 - Add charts for login trends
 - Add filtering by username, IP address, and status
 - Add Docker setup
