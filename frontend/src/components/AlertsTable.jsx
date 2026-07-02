@@ -1,4 +1,4 @@
-function AlertsTable({ alerts }) {
+function AlertsTable({ alerts, onResolveAlert }) {
   if (alerts.length === 0) {
     return <p style={styles.empty}>No security alerts found.</p>;
   }
@@ -14,6 +14,7 @@ function AlertsTable({ alerts }) {
             <th style={styles.th}>IP Address</th>
             <th style={styles.th}>Resolved</th>
             <th style={styles.th}>Created At</th>
+            <th style={styles.th}>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -38,6 +39,18 @@ function AlertsTable({ alerts }) {
               </td>
               <td style={styles.td}>
                 {new Date(alert.created_at).toLocaleString()}
+              </td>
+              <td style={styles.td}>
+                {alert.resolved ? (
+                  <span style={styles.noAction}>Done</span>
+                ) : (
+                  <button
+                    style={styles.resolveButton}
+                    onClick={() => onResolveAlert(alert.id)}
+                  >
+                    Resolve
+                  </button>
+                )}
               </td>
             </tr>
           ))}
@@ -97,6 +110,19 @@ const styles = {
     borderRadius: '999px',
     fontWeight: 700,
     fontSize: '12px',
+  },
+  resolveButton: {
+    padding: '7px 10px',
+    borderRadius: '8px',
+    border: 'none',
+    background: '#2563eb',
+    color: '#ffffff',
+    fontWeight: 700,
+    cursor: 'pointer',
+  },
+  noAction: {
+    color: '#6b7280',
+    fontSize: '13px',
   },
   empty: {
     color: '#6b7280',

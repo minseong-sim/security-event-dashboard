@@ -9,6 +9,7 @@ import AlertsTable from '../components/AlertsTable';
 function Dashboard() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
+
   const [summary, setSummary] = useState(null);
   const [loginAttempts, setLoginAttempts] = useState([]);
   const [securityAlerts, setSecurityAlerts] = useState([]);
@@ -17,34 +18,51 @@ function Dashboard() {
 
   const API_BASE_URL = 'http://localhost:5001';
 
+  const fetchDashboardData = async () => {
+    try {
+      setError('');
+
+      const summaryResponse = await axios.get(
+        `${API_BASE_URL}/api/dashboard/summary`
+      );
+
+      const loginAttemptsResponse = await axios.get(
+        `${API_BASE_URL}/api/login-attempts`
+      );
+
+      const securityAlertsResponse = await axios.get(
+        `${API_BASE_URL}/api/security-alerts`
+      );
+
+      setSummary(summaryResponse.data);
+      setLoginAttempts(loginAttemptsResponse.data.loginAttempts);
+      setSecurityAlerts(securityAlertsResponse.data.securityAlerts);
+    } catch (err) {
+      console.error(err);
+      setError(
+        'Failed to load dashboard data. Please check if the backend server is running.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const summaryResponse = await axios.get(
-          `${API_BASE_URL}/api/dashboard/summary`
-        );
-
-        const loginAttemptsResponse = await axios.get(
-          `${API_BASE_URL}/api/login-attempts`
-        );
-
-        const securityAlertsResponse = await axios.get(
-          `${API_BASE_URL}/api/security-alerts`
-        );
-
-        setSummary(summaryResponse.data);
-        setLoginAttempts(loginAttemptsResponse.data.loginAttempts);
-        setSecurityAlerts(securityAlertsResponse.data.securityAlerts);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load dashboard data. Please check if the backend server is running.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDashboardData();
   }, []);
+
+  const handleResolveAlert = async (alertId) => {
+    try {
+      await axios.patch(
+        `${API_BASE_URL}/api/security-alerts/${alertId}/resolve`
+      );
+
+      await fetchDashboardData();
+    } catch (err) {
+      console.error(err);
+      setError('Failed to resolve security alert.');
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -100,7 +118,10 @@ function Dashboard() {
                 </div>
               </div>
 
-              <AlertsTable alerts={securityAlerts} />
+              <AlertsTable
+                alerts={securityAlerts}
+                onResolveAlert={handleResolveAlert}
+              />
             </section>
 
             <section style={styles.section}>
@@ -146,6 +167,13 @@ const styles = {
     gap: '24px',
     alignItems: 'flex-start',
   },
+  headerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
   label: {
     margin: 0,
     color: '#2563eb',
@@ -166,6 +194,15 @@ const styles = {
     maxWidth: '680px',
     lineHeight: 1.6,
   },
+  userBox: {
+    padding: '10px 14px',
+    borderRadius: '999px',
+    background: '#eff6ff',
+    color: '#1d4ed8',
+    fontWeight: 600,
+    fontSize: '14px',
+    whiteSpace: 'nowrap',
+  },
   statusBox: {
     display: 'flex',
     alignItems: 'center',
@@ -184,6 +221,15 @@ const styles = {
     borderRadius: '999px',
     background: '#10b981',
     display: 'inline-block',
+  },
+  logoutButton: {
+    padding: '10px 14px',
+    borderRadius: '999px',
+    border: 'none',
+    background: '#111827',
+    color: '#ffffff',
+    fontWeight: 700,
+    cursor: 'pointer',
   },
   section: {
     background: '#ffffff',
@@ -218,31 +264,6 @@ const styles = {
     padding: '16px',
     borderRadius: '12px',
     fontWeight: 600,
-  },
-  headerActions: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-end',
-  },
-  userBox: {
-    padding: '10px 14px',
-    borderRadius: '999px',
-    background: '#eff6ff',
-    color: '#1d4ed8',
-    fontWeight: 600,
-    fontSize: '14px',
-    whiteSpace: 'nowrap',
-  },
-  logoutButton: {
-    padding: '10px 14px',
-    borderRadius: '999px',
-    border: 'none',
-    background: '#111827',
-    color: '#ffffff',
-    fontWeight: 700,
-    cursor: 'pointer',
   },
 };
 
