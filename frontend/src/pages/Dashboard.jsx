@@ -19,25 +19,46 @@ function Dashboard() {
   const API_BASE_URL = 'http://localhost:5001';
 
   const fetchDashboardData = async () => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
     try {
       setError('');
 
       const summaryResponse = await axios.get(
-        `${API_BASE_URL}/api/dashboard/summary`
+        `${API_BASE_URL}/api/dashboard/summary`,
+        config
       );
 
       const loginAttemptsResponse = await axios.get(
-        `${API_BASE_URL}/api/login-attempts`
+        `${API_BASE_URL}/api/login-attempts`,
+        config
       );
 
       const securityAlertsResponse = await axios.get(
-        `${API_BASE_URL}/api/security-alerts`
+        `${API_BASE_URL}/api/security-alerts`,
+        config
       );
 
       setSummary(summaryResponse.data);
       setLoginAttempts(loginAttemptsResponse.data.loginAttempts);
       setSecurityAlerts(securityAlertsResponse.data.securityAlerts);
     } catch (err) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
       console.error(err);
       setError(
         'Failed to load dashboard data. Please check if the backend server is running.'
@@ -53,8 +74,16 @@ function Dashboard() {
 
   const handleResolveAlert = async (alertId) => {
     try {
+      const token = localStorage.getItem('token');
+
       await axios.patch(
-        `${API_BASE_URL}/api/security-alerts/${alertId}/resolve`
+        `${API_BASE_URL}/api/security-alerts/${alertId}/resolve`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       await fetchDashboardData();
@@ -66,6 +95,7 @@ function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     navigate('/login');
   };
 

@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
 const { checkAndCreateFailedLoginAlert } = require('../services/alert.service');
 
@@ -99,8 +100,19 @@ const login = async (req, res) => {
       });
     }
 
+    const token = jwt.sign(
+      {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
     return res.status(200).json({
       message: 'Login successful',
+      token,
       user: {
         id: user.id,
         username: user.username,
